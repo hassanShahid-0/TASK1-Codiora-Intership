@@ -1,0 +1,276 @@
+:root {
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --primary-gradient: linear-gradient(135deg, var(--emerald-500) 0%, var(--teal-500) 100%);
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+}
+
+body {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 30%, #f8fafc 100%);
+  color: var(--slate-900);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ─── Bootstrap Primary Color Overrides ─── */
+.bg-primary {
+  background-color: var(--emerald-600) !important;
+}
+
+.text-primary {
+  color: var(--emerald-600) !important;
+}
+
+.btn-primary {
+  background: var(--primary-gradient) !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25) !important;
+  font-weight: 600 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: linear-gradient(135deg, var(--emerald-600) 0%, var(--emerald-700) 100%) !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-outline-primary {
+  color: var(--emerald-600) !important;
+  border-color: var(--emerald-600) !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background: var(--emerald-600) !important;
+  border-color: var(--emerald-600) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+.spinner-border.text-primary {
+  color: var(--emerald-500) !important;
+}
+
+/* ─── Beautiful Responsive Sidebar ─── */
+.sidebar-container {
+  width: 240px;
+  min-height: calc(100vh - 73px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(180deg, var(--slate-900) 0%, #0c1a2e 100%) !important;
+}
+
+.sidebar-container .nav-link {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.sidebar-container .nav-link:hover {
+  background-color: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.1);
+}
+
+.sidebar-container .nav-link.active {
+  background: var(--primary-gradient) !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 76px;
+    padding: 0.75rem !important;
+  }
+
+  .sidebar-container span {
+    display: none;
+  }
+
+  .sidebar-container .nav-link {
+    justify-content: center;
+    padding: 0.75rem !important;
+    border-radius: 12px;
+  }
+
+  .sidebar-container .nav-link i {
+    font-size: 1.25rem !important;
+    margin: 0 !important;
+  }
+}
+
+/* ─── Welcome Banner Gradient ─── */
+.bg-gradient-welcome {
+  background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.15) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-gradient-welcome::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.bg-gradient-welcome::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── Smooth Transitions ─── */
+.btn, .nav-link, .form-control, .form-select, .card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Premium Card Designs ─── */
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+.hover-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 10px 10px -5px rgba(16, 185, 129, 0.04) !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+/* ─── Premium Focus Rings ─── */
+.form-control:focus, .form-select:focus {
+  border-color: var(--emerald-500) !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12) !important;
+}
+
+/* ─── Custom Badge Styles (Emerald theme) ─── */
+.badge-beginner {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+.badge-intermediate {
+  background-color: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+.badge-advanced {
+  background-color: #d1fae5 !important;
+  color: #047857 !important;
+}
+
+/* ─── Stat Icon Circles ─── */
+.stat-icon-emerald {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: var(--emerald-600) !important;
+}
+
+.stat-icon-teal {
+  background-color: rgba(20, 184, 166, 0.1) !important;
+  color: var(--teal-500) !important;
+}
+
+.stat-icon-cyan {
+  background-color: rgba(6, 182, 212, 0.1) !important;
+  color: #0891b2 !important;
+}
+
+/* ─── Progress Bar Colors ─── */
+.progress-emerald {
+  background-color: var(--emerald-500) !important;
+}
+
+.progress-teal {
+  background-color: var(--teal-500) !important;
+}
+
+.progress-cyan {
+  background-color: #06b6d4 !important;
+}
+
+/* ─── Page Load Animation ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container-fluid {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a7f3d0;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--emerald-500);
+}
+
+/* ─── Custom Navbar Theme (GrowthHub) ─── */
+.navbar-themed {
+  background: linear-gradient(90deg, var(--slate-900) 0%, #064e3b 100%) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15) !important;
+}
+
+.brand-text {
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.brand-accent {
+  color: var(--teal-400) !important;
+}
+
+.btn-logout {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.btn-logout:hover {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+  color: #fca5a5 !important;
+}
+

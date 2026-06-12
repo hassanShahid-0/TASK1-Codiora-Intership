@@ -1,0 +1,10 @@
+cd "c:\Hassan\Intership\Task1\Portfolio Management System\server"
+npm run dev
+
+cd "c:\Hassan\Intership\Task1\Portfolio Management System\client"
+npm run dev
+
+run both command in different terminal for the project to run
+
+
+start http://localhost:3000

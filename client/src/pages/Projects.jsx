@@ -1,0 +1,267 @@
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
+import ProjectCard from '../components/ProjectCard';
+
+const Projects = () => {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [projectTitle, setProjectTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [technologiesUsed, setTechnologiesUsed] = useState('');
+  const [githubLink, setGithubLink] = useState('');
+  const [liveDemoLink, setLiveDemoLink] = useState('');
+
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const fetchProjects = async () => {
+    try {
+      const res = await api.get('/api/projects');
+      setProjects(res.data);
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setError('Failed to fetch projects.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [isModalOpen]);
+
+  const openAddModal = () => {
+    setEditingProject(null);
+    setProjectTitle('');
+    setDescription('');
+    setTechnologiesUsed('');
+    setGithubLink('');
+    setLiveDemoLink('');
+    setError('');
+    setSuccess('');
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (project) => {
+    setEditingProject(project);
+    setProjectTitle(project.projectTitle);
+    setDescription(project.description || '');
+    setTechnologiesUsed(project.technologiesUsed || '');
+    setGithubLink(project.githubLink || '');
+    setLiveDemoLink(project.liveDemoLink || '');
+    setError('');
+    setSuccess('');
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingProject(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!projectTitle) {
+      setError('Project title is required.');
+      return;
+    }
+
+    const projectData = {
+      projectTitle,
+      description,
+      technologiesUsed,
+      githubLink,
+      liveDemoLink,
+    };
+
+    try {
+      if (editingProject) {
+        await api.put(`/api/projects/${editingProject._id}`, projectData);
+        setSuccess('Project updated successfully!');
+      } else {
+        await api.post('/api/projects', projectData);
+        setSuccess('Project added successfully!');
+      }
+      fetchProjects();
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Something went wrong.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      setError('');
+      setSuccess('');
+      try {
+        await api.delete(`/api/projects/${id}`);
+        setSuccess('Project deleted successfully!');
+        fetchProjects();
+      } catch (err) {
+        console.error(err);
+        setError(err.response?.data?.message || 'Failed to delete project.');
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container-fluid p-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold text-dark mb-0">Manage Projects</h2>
+        <button onClick={openAddModal} className="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 rounded-3">
+          <i className="bi bi-plus-circle"></i> Add New Project
+        </button>
+      </div>
+
+      {success && (
+        <div className="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+          <i className="bi bi-check-circle-fill me-2"></i> {success}
+          <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
+        </div>
+      )}
+
+      {error && (
+        <div className="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+          <i className="bi bi-x-circle-fill me-2"></i> {error}
+          <button type="button" className="btn-close" onClick={() => setError('')}></button>
+        </div>
+      )}
+
+      {projects.length === 0 ? (
+        <div className="text-center py-5 bg-white rounded-3 shadow-sm border">
+          <span className="fs-1 d-block mb-3">💻</span>
+          <h4 className="fw-bold text-dark">No Projects Found</h4>
+          <p className="text-muted small mb-4">Add your projects to showcase them in your professional profile</p>
+          <button onClick={openAddModal} className="btn btn-primary btn-sm rounded-3">
+            Add Your First Project
+          </button>
+        </div>
+      ) : (
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          {projects.map((project) => (
+            <div key={project._id} className="col">
+              <ProjectCard project={project} onEdit={openEditModal} onDelete={handleDelete} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 rounded-3 shadow-lg">
+              <div className="modal-header border-bottom-0 pb-0">
+                <h5 className="modal-title fw-bold text-dark">
+                  {editingProject ? 'Edit Project' : 'Add New Project'}
+                </h5>
+                <button type="button" className="btn-close" onClick={closeModal}></button>
+              </div>
+              <form onSubmit={handleSubmit}>
+                <div className="modal-body p-4">
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <label htmlFor="projectTitle" className="form-label text-muted small fw-bold">Project Title</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="projectTitle"
+                        placeholder="e.g., E-Commerce App, Chat system"
+                        value={projectTitle}
+                        onChange={(e) => setProjectTitle(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="col-12">
+                      <label htmlFor="description" className="form-label text-muted small fw-bold">Description</label>
+                      <textarea
+                        className="form-control"
+                        id="description"
+                        rows="3"
+                        placeholder="Provide details about the project features, structure, and challenge..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      ></textarea>
+                    </div>
+
+                    <div className="col-12">
+                      <label htmlFor="technologiesUsed" className="form-label text-muted small fw-bold">Technologies Used (comma separated)</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="technologiesUsed"
+                        placeholder="e.g., React, Node.js, Express, MongoDB"
+                        value={technologiesUsed}
+                        onChange={(e) => setTechnologiesUsed(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <label htmlFor="githubLink" className="form-label text-muted small fw-bold">GitHub Repository Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        id="githubLink"
+                        placeholder="https://github.com/username/project"
+                        value={githubLink}
+                        onChange={(e) => setGithubLink(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="col-md-6">
+                      <label htmlFor="liveDemoLink" className="form-label text-muted small fw-bold">Live Demo URL</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        id="liveDemoLink"
+                        placeholder="https://myproject.com"
+                        value={liveDemoLink}
+                        onChange={(e) => setLiveDemoLink(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer border-top-0 pt-0">
+                  <button type="button" className="btn btn-light rounded-3" onClick={closeModal}>Cancel</button>
+                  <button type="submit" className="btn btn-primary rounded-3 px-4">
+                    {editingProject ? 'Save Changes' : 'Add Project'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Projects;
