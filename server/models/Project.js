@@ -10,6 +10,10 @@ const ProjectSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add project title']
   },
+  category: {
+    type: String,
+    default: 'Uncategorized'
+  },
   description: {
     type: String,
     default: ''

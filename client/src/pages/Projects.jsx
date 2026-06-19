@@ -9,10 +9,14 @@ const Projects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [projectTitle, setProjectTitle] = useState('');
+  const [category, setCategory] = useState('Web App');
   const [description, setDescription] = useState('');
   const [technologiesUsed, setTechnologiesUsed] = useState('');
   const [githubLink, setGithubLink] = useState('');
   const [liveDemoLink, setLiveDemoLink] = useState('');
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -47,6 +51,7 @@ const Projects = () => {
   const openAddModal = () => {
     setEditingProject(null);
     setProjectTitle('');
+    setCategory('Web App');
     setDescription('');
     setTechnologiesUsed('');
     setGithubLink('');
@@ -59,6 +64,7 @@ const Projects = () => {
   const openEditModal = (project) => {
     setEditingProject(project);
     setProjectTitle(project.projectTitle);
+    setCategory(project.category || 'Uncategorized');
     setDescription(project.description || '');
     setTechnologiesUsed(project.technologiesUsed || '');
     setGithubLink(project.githubLink || '');
@@ -85,6 +91,7 @@ const Projects = () => {
 
     const projectData = {
       projectTitle,
+      category,
       description,
       technologiesUsed,
       githubLink,
@@ -132,13 +139,45 @@ const Projects = () => {
     );
   }
 
+  const uniqueCategories = [...new Set(projects.map(p => p.category || 'Uncategorized'))];
+
+  const filteredProjects = projects.filter(p => {
+    const matchesSearch = (p.projectTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (p.technologiesUsed || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = filterCategory === '' || (p.category || 'Uncategorized') === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <h2 className="fw-bold text-dark mb-0">Manage Projects</h2>
-        <button onClick={openAddModal} className="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 rounded-3">
-          <i className="bi bi-plus-circle"></i> Add New Project
-        </button>
+        
+        <div className="d-flex flex-column flex-md-row gap-2 flex-grow-1 justify-content-end">
+          <input 
+            type="text" 
+            className="form-control" 
+            style={{ maxWidth: '250px' }}
+            placeholder="Search projects..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select 
+            className="form-select" 
+            style={{ maxWidth: '200px' }}
+            value={filterCategory} 
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {uniqueCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <button onClick={openAddModal} className="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-nowrap">
+            <i className="bi bi-plus-circle"></i> Add New Project
+          </button>
+        </div>
       </div>
 
       {success && (
@@ -155,18 +194,18 @@ const Projects = () => {
         </div>
       )}
 
-      {projects.length === 0 ? (
+      {filteredProjects.length === 0 ? (
         <div className="text-center py-5 bg-white rounded-3 shadow-sm border">
           <span className="fs-1 d-block mb-3">💻</span>
           <h4 className="fw-bold text-dark">No Projects Found</h4>
-          <p className="text-muted small mb-4">Add your projects to showcase them in your professional profile</p>
+          <p className="text-muted small mb-4">Try adjusting your filters, or add a new project.</p>
           <button onClick={openAddModal} className="btn btn-primary btn-sm rounded-3">
-            Add Your First Project
+            Add New Project
           </button>
         </div>
       ) : (
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div key={project._id} className="col">
               <ProjectCard project={project} onEdit={openEditModal} onDelete={handleDelete} />
             </div>
@@ -187,16 +226,28 @@ const Projects = () => {
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
                   <div className="row g-3">
-                    <div className="col-12">
+                    <div className="col-md-6">
                       <label htmlFor="projectTitle" className="form-label text-muted small fw-bold">Project Title</label>
                       <input
                         type="text"
                         className="form-control"
                         id="projectTitle"
-                        placeholder="e.g., E-Commerce App, Chat system"
+                        placeholder="e.g., E-Commerce App"
                         value={projectTitle}
                         onChange={(e) => setProjectTitle(e.target.value)}
                         required
+                      />
+                    </div>
+                    
+                    <div className="col-md-6">
+                      <label htmlFor="category" className="form-label text-muted small fw-bold">Category</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="category"
+                        placeholder="e.g., Web App, Mobile"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
                       />
                     </div>
 

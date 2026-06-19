@@ -18,6 +18,7 @@ const getProjects = async (req, res) => {
 const addProject = async (req, res) => {
   const {
     projectTitle,
+    category,
     description,
     technologiesUsed,
     githubLink,
@@ -32,6 +33,7 @@ const addProject = async (req, res) => {
     const project = new Project({
       user: req.user.id,
       projectTitle,
+      category: category || 'Uncategorized',
       description: description || '',
       technologiesUsed: technologiesUsed || '',
       githubLink: githubLink || '',
@@ -51,6 +53,7 @@ const addProject = async (req, res) => {
 const updateProject = async (req, res) => {
   const {
     projectTitle,
+    category,
     description,
     technologiesUsed,
     githubLink,
@@ -72,6 +75,7 @@ const updateProject = async (req, res) => {
       req.params.id,
       {
         projectTitle,
+        category: category || 'Uncategorized',
         description: description || '',
         technologiesUsed: technologiesUsed || '',
         githubLink: githubLink || '',

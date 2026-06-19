@@ -9,7 +9,12 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
     <div className="card h-100 shadow-sm border-0 rounded-3 hover-card">
       <div className="card-body d-flex flex-column justify-content-between p-4">
         <div>
-          <h5 className="card-title fw-bold text-dark mb-2">{project.projectTitle}</h5>
+          <div className="d-flex justify-content-between align-items-start mb-2">
+            <h5 className="card-title fw-bold text-dark mb-0">{project.projectTitle}</h5>
+            <span className="badge bg-primary text-white ms-2" style={{ fontSize: '0.75rem' }}>
+              {project.category || 'Uncategorized'}
+            </span>
+          </div>
           <p className="card-text text-muted mb-3" style={{ fontSize: '0.9rem' }}>
             {project.description || 'No description provided.'}
           </p>

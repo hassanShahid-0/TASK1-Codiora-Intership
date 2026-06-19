@@ -7,6 +7,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [skillsCount, setSkillsCount] = useState(0);
   const [projectsCount, setProjectsCount] = useState(0);
+  const [categoriesCount, setCategoriesCount] = useState(0);
   const [portfolioExists, setPortfolioExists] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +22,8 @@ const Dashboard = () => {
         
         setSkillsCount(skillsRes.data.length);
         setProjectsCount(projectsRes.data.length);
+        const uniqueCategories = new Set(projectsRes.data.map(p => p.category || 'Uncategorized'));
+        setCategoriesCount(uniqueCategories.size);
         setPortfolioExists(!!portfolioRes.data);
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
@@ -56,13 +59,13 @@ const Dashboard = () => {
       </div>
 
       <div className="row g-4 mb-5">
-        <div className="col-md-4">
+        <div className="col-md-6 col-lg-3">
           <div className="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-row align-items-center gap-4 bg-white hover-card">
             <div className="stat-icon-emerald rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ width: '70px', height: '70px' }}>
               <i className="bi bi-person-badge fs-2"></i>
             </div>
             <div>
-              <span className="text-muted small d-block mb-1">Portfolio Status</span>
+              <span className="text-muted small d-block mb-1">Portfolio</span>
               <span className={`fw-bold h5 mb-0 ${portfolioExists ? 'text-success' : 'text-warning'}`}>
                 {portfolioExists ? 'Completed' : 'Not Created'}
               </span>
@@ -70,7 +73,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-6 col-lg-3">
           <div className="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-row align-items-center gap-4 bg-white hover-card">
             <div className="stat-icon-teal rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ width: '70px', height: '70px' }}>
               <i className="bi bi-journal-code fs-2"></i>
@@ -82,7 +85,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-6 col-lg-3">
           <div className="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-row align-items-center gap-4 bg-white hover-card">
             <div className="stat-icon-cyan rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ width: '70px', height: '70px' }}>
               <i className="bi bi-code-slash fs-2"></i>
@@ -90,6 +93,18 @@ const Dashboard = () => {
             <div>
               <span className="text-muted small d-block mb-1">Total Projects</span>
               <h2 className="fw-bold text-dark mb-0">{projectsCount}</h2>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-md-6 col-lg-3">
+          <div className="card h-100 border-0 shadow-sm rounded-3 p-4 d-flex flex-row align-items-center gap-4 bg-white hover-card">
+            <div className="stat-icon-emerald rounded-circle p-3 d-flex align-items-center justify-content-center" style={{ width: '70px', height: '70px', backgroundColor: 'rgba(139, 92, 246, 0.1) !important', color: '#8b5cf6 !important' }}>
+              <i className="bi bi-tags fs-2"></i>
+            </div>
+            <div>
+              <span className="text-muted small d-block mb-1">Categories</span>
+              <h2 className="fw-bold text-dark mb-0">{categoriesCount}</h2>
             </div>
           </div>
         </div>
