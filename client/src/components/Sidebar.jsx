@@ -58,6 +58,32 @@ const Sidebar = () => {
             <span>Projects</span>
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="/categories"
+            className={({ isActive }) =>
+              `nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-white ${
+                isActive ? 'active bg-primary' : 'hover-opacity'
+              }`
+            }
+          >
+            <i className="bi bi-tags fs-5"></i>
+            <span>Categories</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/preview"
+            className={({ isActive }) =>
+              `nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-white ${
+                isActive ? 'active bg-primary' : 'hover-opacity'
+              }`
+            }
+          >
+            <i className="bi bi-eye fs-5"></i>
+            <span>Live Preview</span>
+          </NavLink>
+        </li>
       </ul>
     </div>
   );

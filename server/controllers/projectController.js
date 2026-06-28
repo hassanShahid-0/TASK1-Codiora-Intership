@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const Activity = require('../models/Activity');
 
 // @desc    Get all user's projects
 // @route   GET /api/projects
@@ -30,10 +31,16 @@ const addProject = async (req, res) => {
       return res.status(400).json({ message: 'Project title is required' });
     }
 
+    let projectImage = '';
+    if (req.file) {
+      projectImage = `/uploads/${req.file.filename}`;
+    }
+
     const project = new Project({
       user: req.user.id,
       projectTitle,
       category: category || 'Uncategorized',
+      projectImage,
       description: description || '',
       technologiesUsed: technologiesUsed || '',
       githubLink: githubLink || '',
@@ -41,6 +48,13 @@ const addProject = async (req, res) => {
     });
 
     await project.save();
+
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Added project: "${projectTitle}"`
+    });
+
     res.status(201).json(project);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -71,11 +85,17 @@ const updateProject = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
+    let projectImage = project.projectImage;
+    if (req.file) {
+      projectImage = `/uploads/${req.file.filename}`;
+    }
+
     project = await Project.findByIdAndUpdate(
       req.params.id,
       {
         projectTitle,
         category: category || 'Uncategorized',
+        projectImage,
         description: description || '',
         technologiesUsed: technologiesUsed || '',
         githubLink: githubLink || '',
@@ -83,6 +103,12 @@ const updateProject = async (req, res) => {
       },
       { new: true, runValidators: true }
     );
+
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Updated project: "${projectTitle}"`
+    });
 
     res.status(200).json(project);
   } catch (error) {
@@ -105,7 +131,14 @@ const deleteProject = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
+    const projectTitle = project.projectTitle;
     await project.deleteOne();
+
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Deleted project: "${projectTitle}"`
+    });
 
     res.status(200).json({ message: 'Project removed' });
   } catch (error) {

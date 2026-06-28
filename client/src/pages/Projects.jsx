@@ -4,37 +4,45 @@ import ProjectCard from '../components/ProjectCard';
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [projectTitle, setProjectTitle] = useState('');
-  const [category, setCategory] = useState('Web App');
+  const [category, setCategory] = useState('Uncategorized');
   const [description, setDescription] = useState('');
   const [technologiesUsed, setTechnologiesUsed] = useState('');
   const [githubLink, setGithubLink] = useState('');
   const [liveDemoLink, setLiveDemoLink] = useState('');
+  const [projectImageFile, setProjectImageFile] = useState(null);
 
+  // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [filterSkill, setFilterSkill] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const fetchProjects = async () => {
+  const fetchData = async () => {
     try {
-      const res = await api.get('/api/projects');
-      setProjects(res.data);
+      const [projectsRes, categoriesRes] = await Promise.all([
+        api.get('/api/projects'),
+        api.get('/api/categories'),
+      ]);
+      setProjects(projectsRes.data);
+      setCategories(categoriesRes.data);
     } catch (err) {
-      console.error('Error fetching projects:', err);
-      setError('Failed to fetch projects.');
+      console.error('Error fetching projects page data:', err);
+      setError('Failed to fetch required data.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -51,11 +59,12 @@ const Projects = () => {
   const openAddModal = () => {
     setEditingProject(null);
     setProjectTitle('');
-    setCategory('Web App');
+    setCategory(categories.length > 0 ? categories[0].name : 'Uncategorized');
     setDescription('');
     setTechnologiesUsed('');
     setGithubLink('');
     setLiveDemoLink('');
+    setProjectImageFile(null);
     setError('');
     setSuccess('');
     setIsModalOpen(true);
@@ -69,6 +78,7 @@ const Projects = () => {
     setTechnologiesUsed(project.technologiesUsed || '');
     setGithubLink(project.githubLink || '');
     setLiveDemoLink(project.liveDemoLink || '');
+    setProjectImageFile(null);
     setError('');
     setSuccess('');
     setIsModalOpen(true);
@@ -77,6 +87,12 @@ const Projects = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProject(null);
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setProjectImageFile(e.target.files[0]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -89,24 +105,27 @@ const Projects = () => {
       return;
     }
 
-    const projectData = {
-      projectTitle,
-      category,
-      description,
-      technologiesUsed,
-      githubLink,
-      liveDemoLink,
-    };
+    const formData = new FormData();
+    formData.append('projectTitle', projectTitle);
+    formData.append('category', category);
+    formData.append('description', description);
+    formData.append('technologiesUsed', technologiesUsed);
+    formData.append('githubLink', githubLink);
+    formData.append('liveDemoLink', liveDemoLink);
+    if (projectImageFile) {
+      formData.append('projectImage', projectImageFile);
+    }
 
     try {
+      const headers = { 'Content-Type': 'multipart/form-data' };
       if (editingProject) {
-        await api.put(`/api/projects/${editingProject._id}`, projectData);
+        await api.put(`/api/projects/${editingProject._id}`, formData, { headers });
         setSuccess('Project updated successfully!');
       } else {
-        await api.post('/api/projects', projectData);
+        await api.post('/api/projects', formData, { headers });
         setSuccess('Project added successfully!');
       }
-      fetchProjects();
+      fetchData();
       closeModal();
     } catch (err) {
       console.error(err);
@@ -121,7 +140,7 @@ const Projects = () => {
       try {
         await api.delete(`/api/projects/${id}`);
         setSuccess('Project deleted successfully!');
-        fetchProjects();
+        fetchData();
       } catch (err) {
         console.error(err);
         setError(err.response?.data?.message || 'Failed to delete project.');
@@ -139,39 +158,69 @@ const Projects = () => {
     );
   }
 
-  const uniqueCategories = [...new Set(projects.map(p => p.category || 'Uncategorized'))];
+  // Get all unique categories dynamically
+  const uniqueCategories = [...new Set(projects.map((p) => p.category || 'Uncategorized'))];
 
-  const filteredProjects = projects.filter(p => {
-    const matchesSearch = (p.projectTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (p.technologiesUsed || '').toLowerCase().includes(searchQuery.toLowerCase());
+  // Get all unique technology tags from projects for filtering
+  const allTechs = [
+    ...new Set(
+      projects
+        .flatMap((p) => (p.technologiesUsed ? p.technologiesUsed.split(',').map((t) => t.trim()).filter(Boolean) : []))
+    ),
+  ].sort();
+
+  // Filter projects by search query, category, and skill/technology
+  const filteredProjects = projects.filter((p) => {
+    const matchesSearch =
+      (p.projectTitle || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.technologiesUsed || '').toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesCategory = filterCategory === '' || (p.category || 'Uncategorized') === filterCategory;
-    return matchesSearch && matchesCategory;
+
+    const projectTechs = p.technologiesUsed
+      ? p.technologiesUsed.split(',').map((t) => t.trim().toLowerCase())
+      : [];
+    const matchesSkill = filterSkill === '' || projectTechs.includes(filterSkill.toLowerCase());
+
+    return matchesSearch && matchesCategory && matchesSkill;
   });
 
   return (
     <div className="container-fluid p-4">
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+      {/* Header controls with Search & Filter */}
+      <div className="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center mb-4 gap-3">
         <h2 className="fw-bold text-dark mb-0">Manage Projects</h2>
         
-        <div className="d-flex flex-column flex-md-row gap-2 flex-grow-1 justify-content-end">
+        <div className="d-flex flex-wrap gap-2 flex-grow-1 justify-content-xl-end">
           <input 
             type="text" 
             className="form-control" 
-            style={{ maxWidth: '250px' }}
+            style={{ maxWidth: '240px' }}
             placeholder="Search projects..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <select 
             className="form-select" 
-            style={{ maxWidth: '200px' }}
+            style={{ maxWidth: '170px' }}
             value={filterCategory} 
             onChange={(e) => setFilterCategory(e.target.value)}
           >
             <option value="">All Categories</option>
             {uniqueCategories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+          <select 
+            className="form-select" 
+            style={{ maxWidth: '170px' }}
+            value={filterSkill} 
+            onChange={(e) => setFilterSkill(e.target.value)}
+          >
+            <option value="">All Technologies</option>
+            {allTechs.map(tech => (
+              <option key={tech} value={tech}>{tech}</option>
             ))}
           </select>
           <button onClick={openAddModal} className="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 text-nowrap">
@@ -213,6 +262,7 @@ const Projects = () => {
         </div>
       )}
 
+      {/* Add / Edit Modal */}
       {isModalOpen && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -241,14 +291,33 @@ const Projects = () => {
                     
                     <div className="col-md-6">
                       <label htmlFor="category" className="form-label text-muted small fw-bold">Category</label>
-                      <input
-                        type="text"
-                        className="form-control"
+                      <select
+                        className="form-select"
                         id="category"
-                        placeholder="e.g., Web App, Mobile"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
+                      >
+                        <option value="Uncategorized">Uncategorized</option>
+                        {categories.map((cat) => (
+                          <option key={cat._id} value={cat.name}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="col-12">
+                      <label htmlFor="projectImage" className="form-label text-muted small fw-bold">Project Image</label>
+                      <input
+                        type="file"
+                        className="form-control"
+                        id="projectImage"
+                        accept="image/*"
+                        onChange={handleFileChange}
                       />
+                      <span className="text-muted small" style={{ fontSize: '0.85rem' }}>
+                        Leave blank to retain previous image (if editing) or use default card placeholder.
+                      </span>
                     </div>
 
                     <div className="col-12">

@@ -1,4 +1,5 @@
 const Portfolio = require('../models/Portfolio');
+const Activity = require('../models/Activity');
 
 // @desc    Get current user's portfolio
 // @route   GET /api/portfolio
@@ -50,18 +51,28 @@ const createOrUpdatePortfolio = async (req, res) => {
       portfolioFields.profilePicture = profilePicture;
     }
 
+    let isNew = !portfolio;
+
     if (portfolio) {
       portfolio = await Portfolio.findOneAndUpdate(
         { user: req.user.id },
         { $set: portfolioFields },
         { new: true }
       );
-      return res.status(200).json(portfolio);
+    } else {
+      portfolio = new Portfolio(portfolioFields);
+      await portfolio.save();
     }
 
-    portfolio = new Portfolio(portfolioFields);
-    await portfolio.save();
-    res.status(201).json(portfolio);
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: isNew 
+        ? 'Initialized professional portfolio' 
+        : (profilePicture ? 'Updated portfolio profile picture' : 'Updated portfolio profile info')
+    });
+
+    return res.status(200).json(portfolio);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

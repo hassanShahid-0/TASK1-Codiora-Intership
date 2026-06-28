@@ -6,7 +6,14 @@ const ProjectCard = ({ project, onEdit, onDelete }) => {
     : [];
 
   return (
-    <div className="card h-100 shadow-sm border-0 rounded-3 hover-card">
+    <div className="card h-100 shadow-sm border-0 rounded-3 hover-card overflow-hidden">
+      {project.projectImage && (
+        <img
+          src={`http://localhost:5000${project.projectImage}`}
+          alt={project.projectTitle}
+          style={{ height: '170px', objectFit: 'cover', width: '100%' }}
+        />
+      )}
       <div className="card-body d-flex flex-column justify-content-between p-4">
         <div>
           <div className="d-flex justify-content-between align-items-start mb-2">

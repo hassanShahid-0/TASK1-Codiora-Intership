@@ -13,6 +13,8 @@ import Dashboard from './pages/Dashboard';
 import Portfolio from './pages/Portfolio';
 import Skills from './pages/Skills';
 import Projects from './pages/Projects';
+import Categories from './pages/Categories';
+import PortfolioPreview from './pages/PortfolioPreview';
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -84,6 +86,22 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <Projects />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/categories"
+              element={
+                <PrivateRoute>
+                  <Categories />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/preview"
+              element={
+                <PrivateRoute>
+                  <PortfolioPreview />
                 </PrivateRoute>
               }
             />

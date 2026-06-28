@@ -1,4 +1,5 @@
 const Skill = require('../models/Skill');
+const Activity = require('../models/Activity');
 
 // @desc    Get all user's skills
 // @route   GET /api/skills
@@ -30,6 +31,13 @@ const addSkill = async (req, res) => {
     });
 
     await skill.save();
+
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Added skill: "${skillName}" (${skillLevel})`
+    });
+
     res.status(201).json(skill);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -59,6 +67,12 @@ const updateSkill = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Updated skill: "${skillName}"`
+    });
+
     res.status(200).json(skill);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -80,7 +94,14 @@ const deleteSkill = async (req, res) => {
       return res.status(401).json({ message: 'User not authorized' });
     }
 
+    const skillName = skill.skillName;
     await skill.deleteOne();
+
+    // Log activity
+    await Activity.create({
+      user: req.user.id,
+      description: `Deleted skill: "${skillName}"`
+    });
 
     res.status(200).json({ message: 'Skill removed' });
   } catch (error) {

@@ -25,6 +25,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/portfolio', require('./routes/portfolioRoutes'));
 app.use('/api/skills', require('./routes/skillRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
+app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/activities', require('./routes/activityRoutes'));
 
 // Error handling middleware
 const multer = require('multer');

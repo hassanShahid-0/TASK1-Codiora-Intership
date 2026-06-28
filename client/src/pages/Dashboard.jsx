@@ -9,15 +9,17 @@ const Dashboard = () => {
   const [projectsCount, setProjectsCount] = useState(0);
   const [categoriesCount, setCategoriesCount] = useState(0);
   const [portfolioExists, setPortfolioExists] = useState(false);
+  const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [skillsRes, projectsRes, portfolioRes] = await Promise.all([
+        const [skillsRes, projectsRes, portfolioRes, activitiesRes] = await Promise.all([
           api.get('/api/skills'),
           api.get('/api/projects'),
-          api.get('/api/portfolio')
+          api.get('/api/portfolio'),
+          api.get('/api/activities').catch(() => ({ data: [] }))
         ]);
         
         setSkillsCount(skillsRes.data.length);
@@ -25,6 +27,7 @@ const Dashboard = () => {
         const uniqueCategories = new Set(projectsRes.data.map(p => p.category || 'Uncategorized'));
         setCategoriesCount(uniqueCategories.size);
         setPortfolioExists(!!portfolioRes.data);
+        setActivities(activitiesRes.data || []);
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
       } finally {
@@ -156,6 +159,70 @@ const Dashboard = () => {
               <Link to="/projects" className="btn btn-outline-primary w-100 rounded-3">
                 Manage Projects
               </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activities & User Statistics Section */}
+      <div className="row g-4 mt-2 mb-5">
+        {/* Recent Activities */}
+        <div className="col-lg-7">
+          <div className="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
+            <h5 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+              <i className="bi bi-clock-history text-primary"></i> Recent Activities
+            </h5>
+            {activities.length === 0 ? (
+              <p className="text-muted small">No activities logged yet.</p>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {activities.map((act) => (
+                  <div key={act._id} className="d-flex justify-content-between align-items-center border-bottom pb-2">
+                    <div>
+                      <p className="mb-0 text-dark fw-semibold small">{act.description}</p>
+                      <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        {new Date(act.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <span className="badge bg-light text-muted rounded-pill px-2 py-1" style={{ fontSize: '0.75rem' }}>
+                      activity
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* User Statistics */}
+        <div className="col-lg-5">
+          <div className="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
+            <h5 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+              <i className="bi bi-graph-up-arrow text-primary"></i> User Statistics
+            </h5>
+            <div className="d-flex flex-column gap-3">
+              <div className="d-flex justify-content-between border-bottom pb-2">
+                <span className="text-muted small">Profile Name</span>
+                <span className="fw-semibold text-dark small">{user?.name}</span>
+              </div>
+              <div className="d-flex justify-content-between border-bottom pb-2">
+                <span className="text-muted small">Email Address</span>
+                <span className="fw-semibold text-dark small">{user?.email}</span>
+              </div>
+              <div className="d-flex justify-content-between border-bottom pb-2">
+                <span className="text-muted small">Member Since</span>
+                <span className="fw-semibold text-dark small">
+                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                </span>
+              </div>
+              <div className="d-flex justify-content-between border-bottom pb-2">
+                <span className="text-muted small">Total Added Projects</span>
+                <span className="fw-bold text-success small">{projectsCount}</span>
+              </div>
+              <div className="d-flex justify-content-between">
+                <span className="text-muted small">Total Added Skills</span>
+                <span className="fw-bold text-info small">{skillsCount}</span>
+              </div>
             </div>
           </div>
         </div>
